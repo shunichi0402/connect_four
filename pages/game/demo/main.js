@@ -46,11 +46,10 @@ class Grid{
     }
 
     changePiece(player){
-        if(player){
-            throw 'none player';
-        }
 
         let color = '';
+
+        this.isPiece = player;
 
         switch(player){
             case 0:
@@ -64,6 +63,9 @@ class Grid{
                 break;
         }
 
+        this.element.style.backgroundColor = color;
+
+    }
 }
 
 class Map{
@@ -130,7 +132,7 @@ class Game{
                 if (this.map.matrix[y][x] != null) {
                     if (this.map.matrix[y][x].input){
                         this.map.matrix[y][x].element.
-                        addEventListener('click', () => {this.input(x, y, (this.counter % this.player) + 1)});
+                        addEventListener('click', () => {this.input(x, y, (this.counter++ % this.player) + 1)});
                     }
                 }
 
@@ -141,6 +143,7 @@ class Game{
     async input(x, y, player){
         console.log(x, y);
         const grid = this.map.matrix[y][x];
+        console.log(player);
 
         if(grid.isPiece != 0){
             grid.changePiece(player);
@@ -149,27 +152,29 @@ class Game{
 
         switch (grid.direction){
             case 'down':
-                if((x - 1) < 0){
+                if((y + 1) >= this.map.size.y){
                     grid.changePiece(player);
                     return;
                 }
-                if (this.map.matrix[y][x - 1] == null){
+                if (this.map.matrix[y + 1][x] == null){
                     grid.changePiece(player);
                     return;
                 }
-                if (this.map.matrix[y][x - 1].obj){
+                if (this.map.matrix[y + 1][x].obj){
                     grid.changePiece(player);
                     return;
                 }
-                if (this.map.matrix[y][x - 1].isPiece != 0) {
+                if (this.map.matrix[y + 1][x].isPiece !== 0) {
                     grid.changePiece(player);
                     return;
                 }
 
                 grid.changePiece(player);
                 await new Promise(resolve => setTimeout(resolve, 500));
-                grid.changePiece(player);
-                break;
+                grid.changePiece(0);
+                
+                this.input(x, y + 1, player);
+                return
         }
     }
 
