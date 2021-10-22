@@ -49,22 +49,21 @@ class Grid{
         if(player){
             throw 'none player';
         }
-        if(this.isPiece == 0){
-            this.isPiece = player;
 
-            let color = '';
-            switch(player){
-                case 1:
-                    color = 'blue';
-                    break;
-                case 2:
-                    color = 'red';
-                    break;
-            }
-        } else {
-            throw 'this piece is incorrect';
+        let color = '';
+
+        switch(player){
+            case 0:
+                color = '';
+                break;
+            case 1:
+                color = 'blue';
+                break;
+            case 2:
+                color = 'red';
+                break;
         }
-    }
+
 }
 
 class Map{
@@ -92,10 +91,11 @@ class Map{
 class Game{
     constructor(map){
         this.map = map;
+        this.player = 2;
+        this.counter = 0;
     }
 
     initDisplay(pearentElement){
-
         let grdTmpRow = '';
         for(let i = 0; i < this.map.size.y; i++){
             grdTmpRow += config.gridElementSize.height + ' ';
@@ -123,13 +123,67 @@ class Game{
         }
     }
 
+    initInput(){
+        for (let y = 0; y < this.map.size.y; y++) {
+            for (let x = 0; x < this.map.size.x; x++) {
+
+                if (this.map.matrix[y][x] != null) {
+                    if (this.map.matrix[y][x].input){
+                        this.map.matrix[y][x].element.
+                        addEventListener('click', () => {this.input(x, y, (this.counter % this.player) + 1)});
+                    }
+                }
+
+            }
+        }
+    }
+
+    async input(x, y, player){
+        console.log(x, y);
+        const grid = this.map.matrix[y][x];
+
+        if(grid.isPiece != 0){
+            grid.changePiece(player);
+            return;
+        }
+
+        switch (grid.direction){
+            case 'down':
+                if((x - 1) < 0){
+                    grid.changePiece(player);
+                    return;
+                }
+                if (this.map.matrix[y][x - 1] == null){
+                    grid.changePiece(player);
+                    return;
+                }
+                if (this.map.matrix[y][x - 1].obj){
+                    grid.changePiece(player);
+                    return;
+                }
+                if (this.map.matrix[y][x - 1].isPiece != 0) {
+                    grid.changePiece(player);
+                    return;
+                }
+
+                grid.changePiece(player);
+                await new Promise(resolve => setTimeout(resolve, 500));
+                grid.changePiece(player);
+                break;
+        }
+    }
+
 }
 
 
 const map = new Map();
-for(let i = 0; i < 6; i++){
-    for(let j = 0; j < 6; j++){
-        map.setGrid(new Grid(), i, j);
+for(let x = 0; x < 6; x++){
+    for(let y = 0; y < 6; y++){
+        if(y == 0){
+            map.setGrid(new Grid(0, false, true), x, y);
+        } else {
+            map.setGrid(new Grid(0, false, false), x, y);
+        }
     }
 }
 
@@ -137,4 +191,5 @@ const game = new Game(map);
 const gameElemet = document.getElementById('app');
 console.log(game);
 game.initDisplay(gameElemet);
+game.initInput();
 console.log(game.map.matrix[5][2].element);
