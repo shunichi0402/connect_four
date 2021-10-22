@@ -35,14 +35,35 @@ class Grid{
         this.input = inputFlag;
 
         this.element
-        this.initElement();
+        this.initElement()
+
+        this.isPiece = 0;
     }
 
     initElement(){
         this.element = document.createElement('div');
-        this.element.style.height = '100%';
-        this.element.style.width = '100%';
-        this.element.style.backgroundColor = `rgb(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255})`;
+        this.element.classList.add('grid-element');
+    }
+
+    changePiece(player){
+        if(player){
+            throw 'none player';
+        }
+        if(this.isPiece == 0){
+            this.isPiece = player;
+
+            let color = '';
+            switch(player){
+                case 1:
+                    color = 'blue';
+                    break;
+                case 2:
+                    color = 'red';
+                    break;
+            }
+        } else {
+            throw 'this piece is incorrect';
+        }
     }
 }
 
@@ -105,7 +126,7 @@ class Game{
 }
 
 
-const map = new Map()
+const map = new Map();
 for(let i = 0; i < 6; i++){
     for(let j = 0; j < 6; j++){
         map.setGrid(new Grid(), i, j);
