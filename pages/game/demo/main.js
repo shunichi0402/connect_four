@@ -43,6 +43,10 @@ class Grid{
     initElement(){
         this.element = document.createElement('div');
         this.element.classList.add('grid-element');
+
+        if(this.element.obj){
+
+        }
     }
 
     changePiece(player){
@@ -76,8 +80,8 @@ class Map{
     }
 
     initMap(){
-        for(let x = 0; x < this.size.x; x++){
-            this.matrix.push(new Array(this.size.y).fill(null));
+        for(let y = 0; y < this.size.y; y++){
+            this.matrix.push(new Array(this.size.x).fill(null));
         }
     }
 
@@ -141,9 +145,13 @@ class Game{
     }
 
     async input(x, y, player){
-        console.log(x, y);
+
+        if(this.map.matrix[y][x].isPiece !== 0){
+            this.counter--;
+            return;
+        }
+
         const grid = this.map.matrix[y][x];
-        console.log(player);
 
         if(grid.isPiece != 0){
             grid.changePiece(player);
@@ -154,23 +162,27 @@ class Game{
             case 'down':
                 if((y + 1) >= this.map.size.y){
                     grid.changePiece(player);
+                    this.judge(x, y, player);
                     return;
                 }
                 if (this.map.matrix[y + 1][x] == null){
                     grid.changePiece(player);
+                    this.judge(x, y, player);
                     return;
                 }
                 if (this.map.matrix[y + 1][x].obj){
                     grid.changePiece(player);
+                    this.judge(x, y, player);
                     return;
                 }
-                if (this.map.matrix[y + 1][x].isPiece !== 0) {
+                if (this.map.matrix[y + 1][x].isPiece != 0) {
                     grid.changePiece(player);
+                    this.judge(x, y, player);
                     return;
                 }
 
                 grid.changePiece(player);
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 50));
                 grid.changePiece(0);
                 
                 this.input(x, y + 1, player);
@@ -178,12 +190,222 @@ class Game{
         }
     }
 
+    createMatrix(){
+        const mapMatrix = [];
+        for(let i = 0; i < this.map.size.y; i++) mapMatrix.push(new Array(this.map.size.x));
+    
+        for(let i = 0; i < this.map.size.y; i++){
+            for(let j = 0; j < this.map.size.x; j++){
+    
+                if(this.map.matrix[i][j] == null) {
+                    mapMatrix[i][j] = 0;
+                } else if(this.map.matrix[i][j].obj){ 
+                    mapMatrix[i][j] = 0;
+                } else {
+                    mapMatrix[i][j] = this.map.matrix[i][j].isPiece;
+                }
+    
+                console.log(this.map.matrix[i][j].isPiece);
+            }
+        }
+
+        return mapMatrix;
+    }
+
+    judge(x, y, player){
+        const mapMatrix = this.createMatrix();
+        let flag = false;
+        if(this.judgeCol(mapMatrix, x, y, player)) flag = true;
+        if(this.judgeRow(mapMatrix, x, y, player)) flag = true;
+        if(this.judgeDiag1(mapMatrix, x, y, player)) flag = true;
+        if(this.judgeDiag2(mapMatrix, x, y, player)) flag = true;
+        
+        if(flag){
+            document.getElementById('judge').textContent = player == 1 ? 'Blue win!' : 'Red win!';
+            document.getElementById('judge').style.color = player == 1 ? 'blue' : 'red';
+
+            const reloadButton = document.createElement('button');
+            reloadButton.textContent = 'retry';
+            reloadButton.addEventListener('click', () => {
+                location.reload();
+            })
+            document.body.appendChild(reloadButton);
+        }
+    }
+
+    judgeCol(mapMatrix, x, y, player){
+        let yp = 0;
+        let ym = 0;
+        for(;;){
+
+            if(y + yp + 1 >= this.map.size.y){
+                break;
+            }
+
+            if(mapMatrix[y + yp + 1][x] != player){
+                break;
+            }
+
+            yp++;
+        
+        }
+
+        for(;;){
+            if(y + ym - 1 < 0){
+                break;
+            }
+
+            if(mapMatrix[y - ym -1][x] != player){
+                break
+            }
+
+            ym++;
+
+        }
+
+
+        if(yp + ym + 1 >= 4){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    judgeRow(mapMatrix, x, y, player){
+        let xp = 0;
+        let xm = 0;
+
+        for(;;){
+
+            if(x + xp + 1 >= this.map.size.x){
+                break;
+            }
+
+            if(mapMatrix[y][x + xp + 1] != player){
+                break;
+            }
+
+            xp++;
+
+        }
+
+        for(;;){
+
+            if(x - xm - 1 < 0){
+                break;
+            }
+
+            if(mapMatrix[y][x - xm - 1] != player){
+                break;
+            }
+
+            xm++
+        }
+
+        console.log('xm : ' + xm);
+        console.log('xp : ' + xp);
+
+        if(xp + xm + 1 >= 4){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    judgeDiag1(mapMatrix, x, y, player){
+        let p = 0;
+        let m = 0;
+
+        for(;;){
+
+            if(x + p + 1 >= this.map.size.x){
+                break;
+            }
+            if(y + p + 1 >= this.map.size.y){
+                break;
+            }
+
+            if(mapMatrix[y + p + 1][x + p + 1] != player){
+                break;
+            }
+
+            p++;
+
+        }
+
+        for(;;){
+
+            if(x - m - 1 < 0){
+                break;
+            }
+            if(y - m - 1 < 0){
+                break;
+            }
+
+            if(mapMatrix[y - m - 1][x - m - 1] != player){
+                break;
+            }
+
+            m++
+        }
+
+        if(p + m + 1 >= 4){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    judgeDiag2(mapMatrix, x, y, player){
+        let p = 0;
+        let m = 0;
+
+        for(;;){
+
+            if(x + p + 1 >= this.map.size.x){
+                break;
+            }
+            if(y - p - 1 < 0){
+                break;
+            }
+
+            if(mapMatrix[y - p - 1][x + p + 1] != player){
+                break;
+            }
+
+            p++;
+
+        }
+
+        for(;;){
+
+            if(x - m - 1 < 0){
+                break;
+            }
+            if(y + m + 1 >= this.map.size.y){
+                break;
+            }
+
+            if(mapMatrix[y + m + 1][x - m - 1] != player){
+                break;
+            }
+
+            m++
+        }
+
+        if(p + m + 1 >= 4){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }
 
 
-const map = new Map();
+const map = new Map(6, 10);
 for(let x = 0; x < 6; x++){
-    for(let y = 0; y < 6; y++){
+    for(let y = 0; y < 10; y++){
         if(y == 0){
             map.setGrid(new Grid(0, false, true), x, y);
         } else {
@@ -197,4 +419,3 @@ const gameElemet = document.getElementById('app');
 console.log(game);
 game.initDisplay(gameElemet);
 game.initInput();
-console.log(game.map.matrix[5][2].element);
