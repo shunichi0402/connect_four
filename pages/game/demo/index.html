@@ -7,22 +7,71 @@
     <title>game --demo--</title>
     <style>
         #app{
-            height: 600px;
-            width: 600px;
+            position: absolute;
+            top:10px;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .grid-element{
-            height: 100%;
-            width: 100%;
+            height: 100px;
+            width: 100px;
             border: 1px solid black;
             background-color: #aaa;
+        }
+
+        .grid-obj{
+            background-color: #333;
+        }
+
+        .grid-input{
+            background-color: cadetblue;
+        }
+
+        .mordal{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 10;
+        }
+
+        #window{
+            position: absolute;
+            background: #aaa;
+            top: 50%;
+            left: 50%;
+            transform: translateY(-50%) translateX(-50%);
+            border-radius: 5px;
+            border: 1px solid black;
+        }
+
+        #judge{
+            width: 500px;
+            margin-top: 100px;
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        #window>button{
+            width: 400px;
+            margin: 10px 50px;
+            height: 75px;
+            font-size: 25px;
         }
     </style>
 </head>
 <body>
+    <div class="mordal">
+        <div id="window">
+            <h1 id="judge"></h1>
+        </div>
+    </div>
     <div id="app"></div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="./main.js"></script>
-    <h1 id="judge"></h1>
 </body>
 </html>

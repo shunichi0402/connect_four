@@ -44,8 +44,12 @@ class Grid{
         this.element = document.createElement('div');
         this.element.classList.add('grid-element');
 
-        if(this.element.obj){
+        if(this.obj){
+            this.element.classList.add('grid-obj');
+        }
 
+        if(this.input){
+            this.element.classList.add('grid-input');
         }
     }
 
@@ -99,6 +103,7 @@ class Game{
         this.map = map;
         this.player = 2;
         this.counter = 0;
+        this.inputFlag = true;
     }
 
     initDisplay(pearentElement){
@@ -136,7 +141,12 @@ class Game{
                 if (this.map.matrix[y][x] != null) {
                     if (this.map.matrix[y][x].input){
                         this.map.matrix[y][x].element.
-                        addEventListener('click', () => {this.input(x, y, (this.counter++ % this.player) + 1)});
+                        addEventListener('click', () => {
+                            if(this.inputFlag){
+                                this.input(x, y, (this.counter++ % this.player) + 1)
+                                this.inputFlag = false;
+                            }
+                        });
                     }
                 }
 
@@ -148,46 +158,47 @@ class Game{
 
         if(this.map.matrix[y][x].isPiece !== 0){
             this.counter--;
+            this.inputFlag = true;
             return;
         }
 
         const grid = this.map.matrix[y][x];
 
-        if(grid.isPiece != 0){
-            grid.changePiece(player);
-            return;
-        }
-
+        
         switch (grid.direction){
             case 'down':
                 if((y + 1) >= this.map.size.y){
                     grid.changePiece(player);
                     this.judge(x, y, player);
+                    this.inputFlag = true;
                     return;
                 }
                 if (this.map.matrix[y + 1][x] == null){
                     grid.changePiece(player);
                     this.judge(x, y, player);
+                    this.inputFlag = true;
                     return;
                 }
                 if (this.map.matrix[y + 1][x].obj){
                     grid.changePiece(player);
                     this.judge(x, y, player);
+                    this.inputFlag = true;
                     return;
                 }
                 if (this.map.matrix[y + 1][x].isPiece != 0) {
                     grid.changePiece(player);
                     this.judge(x, y, player);
+                    this.inputFlag = true;
                     return;
                 }
-
+                
                 grid.changePiece(player);
                 await new Promise(resolve => setTimeout(resolve, 50));
                 grid.changePiece(0);
                 
                 this.input(x, y + 1, player);
                 return
-        }
+            }
     }
 
     createMatrix(){
@@ -204,8 +215,7 @@ class Game{
                 } else {
                     mapMatrix[i][j] = this.map.matrix[i][j].isPiece;
                 }
-    
-                console.log(this.map.matrix[i][j].isPiece);
+                
             }
         }
 
@@ -225,11 +235,12 @@ class Game{
             document.getElementById('judge').style.color = player == 1 ? 'blue' : 'red';
 
             const reloadButton = document.createElement('button');
-            reloadButton.textContent = 'retry';
+            reloadButton.textContent = 'Retry';
             reloadButton.addEventListener('click', () => {
                 location.reload();
             })
-            document.body.appendChild(reloadButton);
+            document.getElementById('window').appendChild(reloadButton);
+            document.getElementsByClassName('mordal')[0].style.display = 'block';
         }
     }
 
@@ -404,10 +415,25 @@ class Game{
 
 
 const map = new Map(6, 10);
+
 for(let x = 0; x < 6; x++){
     for(let y = 0; y < 10; y++){
-        if(y == 0){
+        if(y == 0 && x == 4){
+            
+        }else if(y == 1 && x == 4){
             map.setGrid(new Grid(0, false, true), x, y);
+        }else if(y == 0){
+            map.setGrid(new Grid(0, false, true), x, y);
+        }else if(y == 3 && x == 1){
+            map.setGrid(new Grid(0, true, false), x, y);
+        }else if(y == 4 && x == 1){
+            map.setGrid(new Grid(0, false, true), x, y);
+        } else if(y == 9 && x == 3) {
+            map.setGrid(new Grid(0, true, false), x, y);
+        } else if(y == 8 && x == 3) {
+            map.setGrid(new Grid(0, true, false), x, y);
+        } else if(y == 9 && x == 0) {
+            map.setGrid(new Grid(0, true, false), x, y);
         } else {
             map.setGrid(new Grid(0, false, false), x, y);
         }
